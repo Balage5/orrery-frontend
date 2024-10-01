@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Orrery</title>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="controller">
+    <div class="col">
+      <h2>Controller</h2>
+      <label for="speed">Speed</label>
+      <input type="range" id="speed" min="0" max="100" value="50">
+    </div>
+    <div class="col">
+      <h2>Planets</h2>
+      <div id="planets">
+        <label for="mercury">Mercury</label>
+        <input type="checkbox" id="mercury" value="Mercury" checked>
+        <label for="venus">Venus</label>
+        <input type="checkbox" id="venus" value="Venus" checked>
+        <label for="earth">Earth</label>
+        <input type="checkbox" id="earth" value="Earth" checked>
+        <label for="mars">Mars</label>
+        <input type="checkbox" id="mars" value="Mars" checked>
+        <label for="jupiter">Jupiter</label>
+        <input type="checkbox" id="jupiter" value="Jupiter" checked>
+        <label for="saturn">Saturn</label>
+        <input type="checkbox" id="saturn" value="Saturn" checked>
+        <label for="uranus">Uranus</label>
+        <input type="checkbox" id="uranus" value="Uranus" checked>
+        <label for="neptune">Neptune</label>
+        <input type="checkbox" id="neptune" value="Neptune" checked>
+      </div>
+    </div>
+    <div class="col">
+      <h2>Actions</h2>
+      <p>Rotate/Look around <span>CTRL + Left click</span></p>
+      <p>Move <span>Right click</span></p>
+      <p>Zoom <span>Mouse wheel</span></p>
+      <p>Change view <span>V</span></p>
+    </div>
+  </div>
+  <script type="module" src="/src/orrery.js"></script>
+</body>
+
+</html>
