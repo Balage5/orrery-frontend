@@ -25,10 +25,10 @@ scene.add(pointLight);
 function createPlanet(radius, texture, position) {
   const geometry = new THREE.SphereGeometry(radius, 32, 32);
   const material = new THREE.MeshStandardMaterial({
-    map: texture,
+    map: texture || null,
     metalness: 0,
     roughness: 1,
-    emissive: 0x000000,
+    //emissive: !texture ? 0xDDDDDD : 0x000000,
   });
   const planet = new THREE.Mesh(geometry, material);
   planet.position.set(...position);
@@ -59,11 +59,12 @@ let planets = [
   { name: "Saturn", radius: 9.45, distance: 95, apiName: "699" },
   { name: "Uranus", radius: 4, distance: 192, apiName: "799" },
   { name: "Neptune", radius: 3.88, distance: 301, apiName: "899" },
+  { name: "Io", radius: 50.286, distance: 421, apiName: "501" },
 ];
 
 // Define scaling factors
 const factor = 0.1;
-const distanceScale = 40 * factor;
+const distanceScale = 50 * factor;
 const sunRadius = 69.88 * factor;
 
 for (const planet of planets) {
@@ -128,6 +129,7 @@ async function updatePlanetPositions() {
 
   for (const planet of planetObjects) {
     const apiUrl = `http://localhost:3000/planet-data?command=${planet.apiName}&date=${currentDate}`;
+    console.log(apiUrl)
 
     try {
       const response = await fetch(apiUrl);
@@ -170,7 +172,7 @@ async function updatePlanetPositions() {
 
         if (ra && dec) {
           const distance = planet.distance; // Use the planet's distance
-          const cartesianCoords = convertToCartesian(ra, dec, distance);
+          const cartesianCoords = convertStringToCartesian(ra, dec, distance);
 
           if (
             !isNaN(cartesianCoords.x) &&
@@ -183,8 +185,7 @@ async function updatePlanetPositions() {
               cartesianCoords.z
             );
             console.log(
-              `Updated coordinates for ${
-                planet.name
+              `Updated coordinates for ${planet.name
               }: x=${cartesianCoords.x.toFixed(
                 2
               )}, y=${cartesianCoords.y.toFixed(
@@ -208,7 +209,7 @@ async function updatePlanetPositions() {
   }
 }
 
-function convertToCartesian(ra, dec, distance) {
+function convertStringToCartesian(ra, dec, distance) {
   const raParts = ra.split(" ");
   const decParts = dec.split(" ");
 
@@ -236,6 +237,17 @@ function convertToCartesian(ra, dec, distance) {
   return { x, y, z };
 }
 
+function convertNumToCartesian(ra, dec, distance) {
+  const raRadians = (ra * Math.PI) / 180;
+  const decRadians = (dec * Math.PI) / 180;
+
+  const x = distance * Math.cos(decRadians) * Math.cos(raRadians);
+  const y = distance * Math.cos(decRadians) * Math.sin(raRadians);
+  const z = distance * Math.sin(decRadians);
+
+  return { x, y, z };
+}
+
 // Setup checkboxes for planet visibility
 const checkboxes = document.querySelectorAll("input[type=checkbox]");
 
@@ -243,8 +255,7 @@ checkboxes.forEach((checkbox) => {
   checkbox.addEventListener("change", (event) => {
     const planetName = event.target.value;
     console.log(
-      `Checkbox for ${planetName} is ${
-        event.target.checked ? "checked" : "unchecked"
+      `Checkbox for ${planetName} is ${event.target.checked ? "checked" : "unchecked"
       }`
     );
     if (event.target.checked) {
@@ -338,6 +349,8 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
+//
+
 // Set up the scene, camera, and renderer
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -351,4 +364,68 @@ window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+async function getObjects() {
+  console.log("==TEST==")
+  const response = await fetch("http://localhost:3000/object-data")
+
+  try {
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      console.log("json: " + json);
+
+
+     /* 
+     for (let i = 0; i < json.length; i++) {
+        let object = json[i];
+        let ra = object[2];
+        let dec = object[5];
+        let distance = object[3];
+        let diameter = object[8];
+        let name = object[0];
+        let position = convertStringToCartesian(ra, dec, distance);
+        console.log(`Name: ${name}, RA: ${ra}, Dec: ${dec}, Distance: ${distance}, Diameter: ${diameter}`);
+        console.log(`Position: x=${position.x}, y=${position.y}, z=${position.z}`);
+        createObject(diameter, [position.x, position.y, position.z]);
+      }
+      bug: Position: x=NaN, y=NaN, z=NaN 
+      */
+
+      for (let i = 0; i < json.length; i++) {
+        let object = json[i];
+        let ra = object[2];
+        let dec = object[5];
+        let distance = object[3];
+        let diameter = object[8];
+        let name = object[0];
+        let position = convertNumToCartesian(ra, dec, distance);
+        console.log(`Name: ${name}, RA: ${ra}, Dec: ${dec}, Distance: ${distance}, Diameter: ${diameter}`);
+        console.log(`Position: x=${position.x}, y=${position.y}, z=${position.z}`);
+        createObject(10.0, [position.x, position.y, position.z]);
+      }
+
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+function createObject(radius, position) {
+  const geometry = new THREE.SphereGeometry(radius, 32, 32);
+  const material = new THREE.MeshStandardMaterial({
+    metalness: 0,
+    roughness: 1,
+    emissive: 0xDDDDDD,
+  });
+  const object = new THREE.Mesh(geometry, material);
+  object.position.set(...position);
+  scene.add(object);
+  return object;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  //getObjects();
 });
