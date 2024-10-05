@@ -63,7 +63,7 @@ let planets = [
 
 // Define scaling factors
 const factor = 0.1;
-const distanceScale = 50 * factor;
+const distanceScale = 40 * factor;
 const sunRadius = 69.88 * factor;
 
 for (const planet of planets) {
@@ -279,7 +279,7 @@ function animate() {
   sunLight.position.copy(sun.position);
 
   planetObjects.forEach((planet, index) => {
-    const speed = speedSlider.value / 100000; // Adjust speed as needed
+    const speed = speedSlider.value / 1000000; // Adjust speed
     const angle = Date.now() * speed * (index + 1);
     planet.object.position.x = planet.distance * Math.cos(angle);
     planet.object.position.z = planet.distance * Math.sin(angle);
