@@ -73,6 +73,10 @@ body {
   width: 30%;
 }
 
+.col:nth-child(2) {
+  width: 20%;
+}
+
 .row {
   display: flex;
   flex-direction: row;
