@@ -57,7 +57,6 @@ function createOrbit(radius) {
   return ellipse; // Return the created orbit
 }
 
-// Highlighting function in mouse click handler
 function onMouseClick(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -86,6 +85,7 @@ function onMouseClick(event) {
   }
 }
 
+window.addEventListener("click", onMouseClick, false);
 
 // Define the planets with their parameters
 let planets = [
@@ -309,6 +309,28 @@ checkboxes.forEach((checkbox) => {
     }
   });
 });
+
+// when i press v key toggle over different povs
+document.addEventListener("keydown", function (event) {
+  if (event.key === "v") {
+    // add different camera angles: top down, side view, front view. choose random
+    let randomAngle = Math.floor(Math.random() * 3);
+    if (randomAngle === 0) {
+      camera.position.set(0, 0, 100);
+      camera.lookAt(0, 0, 0);
+    } else if (randomAngle === 1) {
+      camera.position.set(100, 0, 0);
+      camera.lookAt(0, 0, 0);
+    } else {
+      camera.position.set(0, 100, 0);
+      camera.lookAt(0, 0, 0);
+    }
+    
+    
+  }
+});
+
+
 
 animate();
 updatePlanetPositions(); // Initial call to update positions
