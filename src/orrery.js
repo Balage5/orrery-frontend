@@ -29,6 +29,8 @@ const mouse = new THREE.Vector2();
 const highlightedPlanets = new Set(); // To keep track of highlighted planets
 
 // Function to create an orbit for a planet
+
+// Function to create an orbit for a planet
 function createOrbit(radius) {
   const curve = new THREE.EllipseCurve(
     0,
@@ -47,7 +49,7 @@ function createOrbit(radius) {
   const ellipse = new THREE.Line(geometry, material);
   ellipse.rotation.x = Math.PI / 2;
 
-  // Set initial emissive color to be transparent
+  // Initially set emissive properties
   ellipse.material.emissive = new THREE.Color(0x000000);
   ellipse.material.emissiveIntensity = 0;
 
@@ -55,39 +57,35 @@ function createOrbit(radius) {
   return ellipse; // Return the created orbit
 }
 
-// Add event listener for mouse clicks
-window.addEventListener("click", onMouseClick, false);
-
+// Highlighting function in mouse click handler
 function onMouseClick(event) {
-  // Calculate mouse position in normalized device coordinates
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  // Update the raycaster with the camera and mouse position
   raycaster.setFromCamera(mouse, camera);
 
-  // Calculate objects intersecting the picking ray
   const intersects = raycaster.intersectObjects(planetObjects.map(p => p.object));
 
   if (intersects.length > 0) {
     const planet = intersects[0].object;
     const planetData = planetObjects.find(p => p.object === planet);
-    const orbitLine = planetData.orbit; // Reference to the orbit line
+    const orbitLine = planetData.orbit;
 
     // Highlight or unhighlight the orbit line on click
     if (highlightedPlanets.has(planetData.name)) {
-      // If the planet is already highlighted, unhighlight it
-      orbitLine.material.emissive.set(0x000000); // Reset to original
+      orbitLine.material.color.set(0xffffff); // Reset to original color
+      orbitLine.material.emissive.set(0x000000); // Reset to original emissive
       orbitLine.material.emissiveIntensity = 0; // Reset emissive intensity
       highlightedPlanets.delete(planetData.name);
     } else {
-      // Highlight the orbit line
+      orbitLine.material.color.set(0xff0000); // Change to red (highlight color)
       orbitLine.material.emissive.set(0xff0000); // Change to red (highlight color)
       orbitLine.material.emissiveIntensity = 1; // Set emissive intensity
       highlightedPlanets.add(planetData.name);
     }
   }
 }
+
 
 // Define the planets with their parameters
 let planets = [
@@ -292,6 +290,25 @@ function animate() {
   controls.update();
   renderer.render(scene, camera);
 }
+
+
+let dateTag = document.getElementById("date");
+dateTag.addEventListener("change", function () {
+  stateDate = new Date(dateTag.value);
+  updatePlanetPositions();
+});
+
+// get all checkboxes
+let checkboxes = document.querySelectorAll("input[type=checkbox]");
+checkboxes.forEach((checkbox) => {
+  checkbox.addEventListener("change", function () {
+    if (checkbox.checked) {
+      scene.add(planetObjects.find((p) => p.name === checkbox.value).object);
+    } else {
+      scene.remove(planetObjects.find((p) => p.name === checkbox.value).object);
+    }
+  });
+});
 
 animate();
 updatePlanetPositions(); // Initial call to update positions
