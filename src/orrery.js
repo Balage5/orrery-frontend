@@ -135,31 +135,31 @@ function onMouseClick(event) {
   raycaster.setFromCamera(mouse, camera);
 
   const intersects = raycaster.intersectObjects(planetObjects.map(p => p.object));
-
+  
   if (intersects.length > 0) {
     const planet = intersects[0].object;
     const planetData = planetObjects.find(p => p.object === planet);
     const orbitLine = planetData.orbit;
-
+  
     // Highlight or unhighlight the orbit line and planet border on click
     if (highlightedPlanets.has(planetData.name)) {
       orbitLine.material.color.set(0xffffff); // Reset to original color
       orbitLine.material.emissive.set(0x000000); // Reset to original emissive
       orbitLine.material.emissiveIntensity = 0; // Reset emissive intensity
-
+  
       planet.material.emissive.set(0x000000); // Reset planet emissive color
       planet.material.emissiveIntensity = 0; // Reset planet emissive intensity
-
+  
       highlightedPlanets.delete(planetData.name);
       info.innerHTML = `<p>Click on a planet to get more information</p>`; // Clear the info panel
     } else {
       orbitLine.material.color.set(0xff0000); // Change to red (highlight color)
       orbitLine.material.emissive.set(0xff0000); // Change to red (highlight color)
       orbitLine.material.emissiveIntensity = 1; // Set emissive intensity
-
+  
       planet.material.emissive.set(0xff0000); // Change planet emissive color to red
       planet.material.emissiveIntensity = 1; // Set planet emissive intensity
-
+  
       highlightedPlanets.add(planetData.name);
       info.innerHTML = `<h2>${informations[planetData.name.toLowerCase()].name}</h2>
       <p><strong>Distance from Sun:</strong> ${informations[planetData.name.toLowerCase()].distance} AU</p>
@@ -300,10 +300,14 @@ async function updatePlanetPositions() {
 
       if (data.result) {
 
+
+
         const lines = data.result.split("\n");
         let positionFound = false;
         let ra = "";
         let dec = "";
+
+
 
         for (const line of lines) {
           if (line.startsWith("$$SOE")) {
