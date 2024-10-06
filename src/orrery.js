@@ -15,11 +15,81 @@ document.body.appendChild(renderer.domElement);
 
 let stateDate = new Date();
 
+
+const informations = {
+  mercury: {
+    name: "Mercury",
+    distance: 5,
+    radius: 0.383,
+    mass: 0.055,
+    temperature: 700,
+    description: "Mercury is the smallest planet in the Solar System and the closest to the Sun.",
+  },
+  venus: {
+    name: "Venus",
+    distance: 7,
+    radius: 0.949,
+    mass: 0.815,
+    temperature: 465,
+    description: "Venus is the second planet from the Sun. It is named after the Roman goddess of love and beauty.",
+  },
+  earth: {
+    name: "Earth",
+    distance: 10,
+    radius: 1,
+    mass: 1,
+    temperature: 288,
+    description: "Earth is the third planet from the Sun and the only astronomical object known to harbor life.",
+  },
+  mars: {
+    name: "Mars",
+    distance: 15,
+    radius: 0.532,
+    mass: 0.107,
+    temperature: 210,
+    description: "Mars is the fourth planet from the Sun and the second-smallest planet in the Solar System.",
+  },
+  jupiter: {
+    name: "Jupiter",
+    distance: 52,
+    radius: 11.21,
+    mass: 317.8,
+    temperature: 165,
+    description: "Jupiter is the fifth planet from the Sun and the largest in the Solar System.",
+  },
+  saturn: {
+    name: "Saturn",
+    distance: 95,
+    radius: 9.45,
+    mass: 95.2,
+    temperature: 134,
+    description: "Saturn is the sixth planet from the Sun and the second-largest in the Solar System.",
+  },
+  uranus: {
+    name: "Uranus",
+    distance: 192,
+    radius: 4,
+    mass: 14.5,
+    temperature: 76,
+    description: "Uranus is the seventh planet from the Sun. It has the third-largest planetary radius and fourth-largest planetary mass in the Solar System.",
+  },
+  neptune: {
+    name: "Neptune",
+    distance: 301,
+    radius: 3.88,
+    mass: 17.1,
+    temperature: 72,
+    description: "Neptune is the eighth and farthest known Solar planet from the Sun.",
+  },
+};
+
+
+
 // Add orbit controls for camera movement
 const controls = new OrbitControls(camera, renderer.domElement);
 
 // Create and add a bright point light at the center of the solar system
-const pointLight = new THREE.PointLight(0xffffff, 4000 * 2, 4000 * 2);
+const pointLight = new THREE.PointLight(0xffffff, 4000 * 5, 4000 * 5);
 pointLight.position.set(0, 0, 0);
 scene.add(pointLight);
 
@@ -27,8 +97,6 @@ scene.add(pointLight);
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const highlightedPlanets = new Set(); // To keep track of highlighted planets
-
-// Function to create an orbit for a planet
 
 // Function to create an orbit for a planet
 function createOrbit(radius) {
@@ -57,6 +125,9 @@ function createOrbit(radius) {
   return ellipse; // Return the created orbit
 }
 
+
+let info = document.getElementById("info");
+
 function onMouseClick(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -70,18 +141,34 @@ function onMouseClick(event) {
     const planetData = planetObjects.find(p => p.object === planet);
     const orbitLine = planetData.orbit;
 
-    // Highlight or unhighlight the orbit line on click
+    // Highlight or unhighlight the orbit line and planet border on click
     if (highlightedPlanets.has(planetData.name)) {
       orbitLine.material.color.set(0xffffff); // Reset to original color
       orbitLine.material.emissive.set(0x000000); // Reset to original emissive
       orbitLine.material.emissiveIntensity = 0; // Reset emissive intensity
+
+      planet.material.emissive.set(0x000000); // Reset planet emissive color
+      planet.material.emissiveIntensity = 0; // Reset planet emissive intensity
+
       highlightedPlanets.delete(planetData.name);
+      info.innerHTML = `<p>Click on a planet to get more information</p>`; // Clear the info panel
     } else {
       orbitLine.material.color.set(0xff0000); // Change to red (highlight color)
       orbitLine.material.emissive.set(0xff0000); // Change to red (highlight color)
       orbitLine.material.emissiveIntensity = 1; // Set emissive intensity
+
+      planet.material.emissive.set(0xff0000); // Change planet emissive color to red
+      planet.material.emissiveIntensity = 1; // Set planet emissive intensity
+
       highlightedPlanets.add(planetData.name);
+      info.innerHTML = `<h2>${informations[planetData.name.toLowerCase()].name}</h2>
+      <p><strong>Distance from Sun:</strong> ${informations[planetData.name.toLowerCase()].distance} AU</p>
+      <p><strong>Radius:</strong> ${informations[planetData.name.toLowerCase()].radius} Earths</p>
+      <p><strong>Mass:</strong> ${informations[planetData.name.toLowerCase()].mass} Earths</p>
+      <p><strong>Temperature:</strong> ${informations[planetData.name.toLowerCase()].temperature} K</p>
+      <p><strong>Description:</strong> ${informations[planetData.name.toLowerCase()].description}</p>`;
     }
+
   }
 }
 
@@ -191,14 +278,14 @@ function convertStringToCartesian(ra, dec, distance) {
 }
 
 async function updatePlanetPositions() {
-  const givenDate = new Date("2021-05-01").toISOString().split("T")[0];
-  console.log(`Given date: ${givenDate}`);
+  // TEST: const givenDate = new Date("2021-05-01").toISOString().split("T")[0];
+  // console.log(`Given date: ${givenDate}`);
 
   // Store updated planet positions temporarily
   const updatedPositions = [];
 
   for (const planet of planetObjects) {
-    const apiUrl = `http://localhost:3000/planet-data?command=${planet.apiName}&date=${stateDate.toISOString().split("T")[0]}`;
+    const apiUrl = `http://192.168.43.213:3001/planet-data?command=${planet.apiName}&date=${stateDate.toISOString().split("T")[0]}`;
     console.log(apiUrl);
 
     try {
@@ -212,6 +299,7 @@ async function updatePlanetPositions() {
       const data = await response.json();
 
       if (data.result) {
+
         const lines = data.result.split("\n");
         let positionFound = false;
         let ra = "";
@@ -293,6 +381,7 @@ function animate() {
 
 
 let dateTag = document.getElementById("date");
+dateTag.value = stateDate.toISOString().split("T")[0];
 dateTag.addEventListener("change", function () {
   stateDate = new Date(dateTag.value);
   updatePlanetPositions();
@@ -325,11 +414,8 @@ document.addEventListener("keydown", function (event) {
       camera.position.set(0, 100, 0);
       camera.lookAt(0, 0, 0);
     }
-    
-    
   }
 });
-
 
 
 animate();
